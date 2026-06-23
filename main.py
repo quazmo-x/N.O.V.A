@@ -7,7 +7,6 @@ import requests
 import base64
 import json
 import uuid
-import whisper
 
 load_dotenv()
 
@@ -17,7 +16,6 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 ELEVEN_API_KEY = os.getenv("ELEVEN_API_KEY")
 
 client = Groq(api_key=GROQ_API_KEY)
-whisper_model = whisper.load_model("base")
 
 personality = """
 You are N.O.V.A.
@@ -226,20 +224,9 @@ def chat_view(chat_id):
 
 @app.route("/transcribe", methods=["POST"])
 def transcribe_audio():
-    if "audio" not in request.files:
-        return jsonify({"error": "No audio uploaded"}), 400
-
-    audio_file = request.files["audio"]
-    temp_path = "temp_audio.webm"
-    audio_file.save(temp_path)
-
-    try:
-        result = whisper_model.transcribe(temp_path)
-        text = result["text"].strip()
-        return jsonify({"text": text})
-    finally:
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
+    return jsonify({
+        "error": "Whisper transcription is disabled on the deployed version. Use browser speech recognition instead."
+    }), 501
 
 
 @app.route("/new_chat")
