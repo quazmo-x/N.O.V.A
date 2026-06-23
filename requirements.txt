@@ -2,5 +2,3 @@ Flask
 groq
 python-dotenv
 requests
-openai-whisper
-torch
