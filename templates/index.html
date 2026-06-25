@@ -23,7 +23,7 @@
         }
 
         /* ── CANVAS ── */
-        #starCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
+        #starCanvas { position:fixed; inset:0; z-index:-1; pointer-events:none; }
 
         /* ── VOID TEXT ── */
         .void-text {
@@ -478,19 +478,44 @@
         }
         .setting-group select:focus,
         .setting-group input:focus{border-color:rgba(96,165,250,0.3);}
-        .wallpaper-btns{display:flex;gap:10px;flex-wrap:wrap;}
-        .wallpaper{
-            width:36px;height:36px;border-radius:50%;cursor:pointer;
-            border:2px solid rgba(255,255,255,0.1);transition:0.2s ease;
-            position:relative;
-        }
+       .wallpaper-btns{
+    display:grid;
+    grid-template-columns:repeat(5,40px);
+    gap:12px;
+}
+       .wallpaper{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    cursor:pointer;
+    border:2px solid rgba(255,255,255,.15);
+    transition:.25s;
+    background-size:cover !important;
+    background-position:center !important;
+    background-repeat:no-repeat !important;
+    flex-shrink:0;
+}
         .wallpaper:hover{transform:scale(1.12);border-color:rgba(96,165,250,0.5);}
         .wallpaper.selected{border-color:#3b82f6;box-shadow:0 0 10px rgba(59,130,246,0.5);}
-        .blue-wp{background:linear-gradient(135deg,#1e3a8a,#0f172a);}
-        .green-wp{background:linear-gradient(135deg,#065f46,#022c22);}
-        .purple-wp{background:linear-gradient(135deg,#581c87,#1e1b4b);}
-        .red-wp{background:radial-gradient(circle,#7f1d1d,#450a0a);}
-        .galaxy-wp{background:radial-gradient(circle,#1e1b4b,#0f172a,#000);}
+       .default-wp{
+    background:#000;
+}
+
+.red-wp{
+    background-image:url("/static/wallpapers/red-nebula.jpg");
+}
+
+.galaxy-wp{
+    background-image:url("/static/wallpapers/galaxy.jpg");
+}
+
+.blue-wp{
+    background-image:url("/static/wallpapers/blue-nebula.jpg");
+}
+
+.earth-wp{
+    background-image:url("/static/wallpapers/earth.jpg");
+}
 
         .settings-section{
             border-top:1px solid rgba(255,255,255,0.06);
@@ -614,7 +639,7 @@
 
         /* ── ANIMATED WALLPAPER CANVAS ── */
         #wallpaperCanvas{
-            position:fixed;inset:0;z-index:0;pointer-events:none;
+            position:fixed;inset:0;z-index:-2;pointer-events:none;
             opacity:0;transition:opacity 1s ease;
         }
         #wallpaperCanvas.visible{opacity:1;}
@@ -724,13 +749,29 @@
 
         <div class="setting-group">
             <label>🎨 Wallpaper</label>
-            <div class="wallpaper-btns">
-                <div class="wallpaper blue-wp"   title="Void"     onclick="setWallpaper('void', this)"></div>
-                <div class="wallpaper green-wp"  title="Ocean"     onclick="setWallpaper('ocean', this)"
-                <div class="wallpaper purple-wp" title="Nebula"    onclick="setWallpaper('nebula', this)"
-                <div class="wallpaper red-wp"    title="Red Nebula" onclick="setWallpaper('rednebula', this)"
-                <div class="wallpaper galaxy-wp" title="Galaxy"    onclick="setWallpaper('galaxy', this)"
-            </div>
+          <div class="wallpaper-btns">
+
+<div class="wallpaper default-wp"
+onclick="setWallpaper('default',this)"
+title="Default"></div>
+
+<div class="wallpaper red-wp"
+onclick="setWallpaper('rednebula',this)"
+title="Red Nebula"></div>
+
+<div class="wallpaper galaxy-wp"
+onclick="setWallpaper('galaxy',this)"
+title="Galaxy"></div>
+
+<div class="wallpaper blue-wp"
+onclick="setWallpaper('bluenebula',this)"
+title="Blue Nebula"></div>
+
+<div class="wallpaper earth-wp"
+onclick="setWallpaper('earth',this)"
+title="Earth"></div>
+
+</div>
         </div>
 
         <div class="settings-section">
@@ -966,25 +1007,125 @@ const CHAT_ID = "{{ current_chat }}";
         }
     }
 
+    function drawBlueNebula(){
+
+    ctx.clearRect(0,0,W,H);
+
+    const g=ctx.createRadialGradient(
+        W/2,
+        H/2,
+        0,
+        W/2,
+        H/2,
+        W*0.7
+    );
+
+    g.addColorStop(0,"rgba(0,180,255,.20)");
+    g.addColorStop(.5,"rgba(0,120,255,.08)");
+    g.addColorStop(1,"rgba(0,0,0,0)");
+
+    ctx.fillStyle=g;
+    ctx.fillRect(0,0,W,H);
+
+    particles.forEach(p=>{
+
+        p.x+=p.vx*.3;
+        p.y+=p.vy*.3;
+
+        if(p.x<0)p.x=W;
+        if(p.x>W)p.x=0;
+        if(p.y<0)p.y=H;
+        if(p.y>H)p.y=0;
+
+        // Animate alpha for shimmer
+        p.alpha += (Math.random()-0.5)*0.04;
+        if(p.alpha < 0.2) p.alpha = 0.2;
+        if(p.alpha > 1) p.alpha = 1;
+
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle=`rgba(120,220,255,${p.alpha})`;
+        ctx.fill();
+
+    });
+
+}
+
+function drawEarth(){
+
+    ctx.clearRect(0,0,W,H);
+
+    const glow=ctx.createLinearGradient(
+        0,
+        H*.55,
+        0,
+        H
+    );
+
+    glow.addColorStop(0,"rgba(255,170,40,.18)");
+    glow.addColorStop(1,"rgba(0,0,0,0)");
+
+    ctx.fillStyle=glow;
+    ctx.fillRect(0,0,W,H);
+
+    particles.forEach(p=>{
+
+        p.x += p.vx*0.15;
+        p.y -= 0.08;
+
+        if(p.x<0) p.x=W;
+        if(p.x>W) p.x=0;
+        if(p.y<0){
+            p.y=H;
+            p.x=Math.random()*W;
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r*.7,0,Math.PI*2);
+        ctx.fillStyle="rgba(255,255,255,.9)";
+        ctx.fill();
+
+    });
+
+}
+
     function loop(ts) {
         t = ts;
-        if (mode === 'rednebula') drawRedNebula();
-        else if (mode === 'galaxy') drawGalaxy();
-        else ctx.clearRect(0,0,W,H);
+       if(mode==="rednebula")
+    drawRedNebula();
+
+else if(mode==="galaxy")
+    drawGalaxy();
+
+else if(mode==="bluenebula")
+    drawBlueNebula();
+
+else if(mode==="earth")
+    drawEarth();
+
+else
+    ctx.clearRect(0,0,W,H);
         requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
 
-    window.setAnimatedWallpaper = function(theme) {
-        mode = theme;
-        particles = [];
-        if (theme === 'rednebula' || theme === 'galaxy') {
-            wc.classList.add('visible');
-            for(let i=0;i<200;i++) particles.push(mkParticle(theme));
-        } else {
-            wc.classList.remove('visible');
-        }
-    };
+   window.setAnimatedWallpaper = function(theme){
+
+    mode = theme;
+    particles = [];
+
+    if(theme === "default"){
+        wc.classList.remove("visible");
+        return;
+    }
+
+    wc.classList.add("visible");
+
+    for(let i=0;i<800;i++){
+        particles.push(mkParticle(theme));
+    }
+
+};
 })();
 
 // ═══════════════════════════════════════
@@ -1001,16 +1142,39 @@ function setWallpaper(theme, el=null) {
     applyWallpaper(theme);
 }
 
-function applyWallpaper(theme) {
-    const bodyBg = {
-        void:     '#000',
-        ocean:    'linear-gradient(135deg,#0c1a2e,#0a2a3a,#001a1a)',
-        nebula:   'radial-gradient(circle at top left,#1a0030 0%,#0a001a 60%,#000 100%)',
-        rednebula:'#0a0000',
-        galaxy:   '#000005',
-    };
-    document.body.style.background = bodyBg[theme] || '#000';
-    setAnimatedWallpaper(['rednebula','galaxy'].includes(theme) ? theme : null);
+function applyWallpaper(theme){
+
+const body=document.body;
+
+body.style.background="#000";
+body.style.backgroundImage="none";
+
+switch(theme){
+
+case "rednebula":
+body.style.backgroundImage="url('/static/wallpapers/red-nebula.jpg')";
+break;
+
+case "galaxy":
+body.style.backgroundImage="url('/static/wallpapers/galaxy.jpg')";
+break;
+
+case "bluenebula":
+body.style.backgroundImage="url('/static/wallpapers/blue-nebula.jpg')";
+break;
+
+case "earth":
+body.style.backgroundImage="url('/static/wallpapers/earth.jpg')";
+break;
+
+}
+
+body.style.backgroundSize="cover";
+body.style.backgroundPosition="center";
+body.style.backgroundAttachment="fixed";
+
+setAnimatedWallpaper(theme);
+
 }
 
 // ═══════════════════════════════════════
@@ -1237,16 +1401,25 @@ async function sendMessage() {
         replySound.volume = volumeSliderEl.value / 100;
         replySound.play().catch(()=>{});
 
-        // Play ElevenLabs audio
-        if(isVoice && data.audio_b64 && data.audio_b64.length > 100) {
+        // Play NOVA voice reply whenever audio is returned
+        if(data.audio_b64 && data.audio_b64.length > 100) {
             const audio = document.createElement('audio');
-            audio.src    = `data:audio/mpeg;base64,${data.audio_b64}`;
+            audio.src = `data:audio/mpeg;base64,${data.audio_b64}`;
             audio.volume = volumeSliderEl.value / 100;
             document.body.appendChild(audio);
-            audio.play().catch(err=>console.log('Audio error:', err));
-            audio.onended = ()=>{ audio.remove(); setStatus('online'); };
+
+            audio.play().catch(err => {
+                console.log('Audio error:', err);
+                setStatus('online');
+            });
+
+            audio.onended = () => {
+                audio.remove();
+                setStatus('online');
+            };
         } else {
-            setTimeout(()=>setStatus('online'), 2000);
+            console.warn('No audio returned from backend');
+            setTimeout(() => setStatus('online'), 2000);
         }
 
     } catch(err) {
@@ -1435,15 +1608,15 @@ window.onload = () => {
     fontValue.innerText = savedFont + 'px';
 
     // Restore wallpaper
-   const savedWp = localStorage.getItem('novaWallpaper') || 'void';
+   const savedWp=localStorage.getItem("novaWallpaper")||"default";
 applyWallpaper(savedWp);
 
 const wallpaperMap = {
-    'Void':'void',
-    'Ocean':'ocean',
-    'Nebula':'nebula',
-    'Red Nebula':'rednebula',
-    'Galaxy':'galaxy'
+    "Default":"default",
+    "Red Nebula":"rednebula",
+    "Galaxy":"galaxy",
+    "Blue Nebula":"bluenebula",
+    "Earth":"earth"
 };
 
 document.querySelectorAll('.wallpaper').forEach(w=>{
